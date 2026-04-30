@@ -1,0 +1,38 @@
+# ============================================================
+# .dockerignore
+# Exclude files/directories from Docker build context
+# ============================================================
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# VS Code
+.vscode
+
+# PDF and documentation
+*.pdf
+work_proof1.pdf
+
+# README (not needed inside container)
+README.md
+
+# Docker and CI files (not needed inside the image)
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# GitHub Actions
+.github
+
+# Node modules (if any in future)
+node_modules
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log

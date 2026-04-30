@@ -1,0 +1,26 @@
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.vscode/*.code-workspace
+.idea/
+
+# Node (future-proofing)
+node_modules/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# PDF evidence files (keep locally, not in repo)
+*.pdf

@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Study OS</title>
+    <style>
+        :root {
+            --bg-color: #0f0f13;
+            --card-bg: #1a1a24;
+            --accent-primary: #00f2ff; /* Cyan */
+            --accent-secondary: #a65eff; /* Purple */
+            --text-primary: #e0e0e0;
+            --text-secondary: #9898a6;
+            --success: #39ff14; /* Neon Green */
+            --danger: #ff385c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 { letter-spacing: 1px; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- HEADER & PROGRESS SECTION --- */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--card-bg);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .progress-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+            border: 1px solid #2a2a3a;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .progress-bar-bg {
+            height: 8px;
+            background: #2a2a3a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* --- MAIN SCHEDULE GRID --- */
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .day-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #2a2a3a;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 242, 255, 0.15);
+            border-color: var(--accent-primary);
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, #2a2a3a, #1a1a24);
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #2a2a3a;
+            transition: background 0.2s;
+        }
+
+        .task-item:last-child { border-bottom: none; }
+        .task-item:hover { background: rgba(255,255,255,0.03); }
+
+        .task-time {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-secondary);
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .task-details {
+            flex-grow: 1;
+            padding-left: 15px;
+        }
+        
+        .task-subject {
+            font-weight: 600;
+            display: block;
+        }
+
+        .task-type {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- WEEKEND SPECIAL CARDS --- */
+        .weekend-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .saturday-card .day-header { color: var(--success); }
+        .sunday-card .day-header { color: #ffd700; }
+
+        .revision-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .revision-tag {
+            background: rgba(57, 255, 20, 0.1);
+            color: var(--success);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid var(--success);
+        }
+
+        .break-content {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* --- CUSTOM CHECKBOXES --- */
+        .checkbox-wrapper {
+            position: relative;
+            cursor: pointer;
+            font-size: 22px;
+            user-select: none;
+        }
+
+        .checkbox-wrapper input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: -11px;
+            right: -11px;
+            height: 24px;
+            width: 24px;
+            background-color: #2a2a3a;
+            border: 2px solid var(--text-secondary);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-wrapper:hover input ~ .checkmark { background-color: #3a3a4a; }
+
+        .checkbox-wrapper input:checked ~ .checkmark {
+            background-color: var(--accent-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 8px;
+            top: 4px;
+            width: 5px;
+            height: 10px;
+            border: solid var(--bg-color);
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-wrapper input:checked ~ .checkmark:after { display: block; }
+
+        /* Strikethrough on complete */
+        .task-item.completed .task-details {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        /* --- CHART STYLES --- */
+        .chart-section {
+            margin-top: 30px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #2a2a3a;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #progressChart {
+            max-height: 400px;
+            width: 100% !important;
+        }
+
+        /* --- HEATMAP STYLES --- */
+        .heatmap-section {
+            margin-top: 30px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #2a2a3a;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+
+        .heatmap-container {
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-rows: repeat(7, 12px);
+            grid-auto-flow: column;
+            grid-auto-columns: 12px;
+            gap: 4px;
+        }
+
+        .heatmap-square {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            background: #2a2a3a;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .heatmap-square:hover {
+            transform: scale(1.3);
+            z-index: 10;
+            outline: 1px solid var(--accent-primary);
+        }
+
+        /* GitHub-style Green Scale */
+        .lvl-0 { background: #161b22; }
+        .lvl-1 { background: #0e4429; }
+        .lvl-2 { background: #006d32; }
+        .lvl-3 { background: #26a641; }
+        .lvl-4 { background: #39d353; }
+
+        .heatmap-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+            padding: 0 5px;
+        }
+
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 15px;
+        }
+
+        .legend-square {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📚 Weekly Study Dashboard</h1>
+        <p style="color: var(--text-secondary)">Stay Focused. Track Progress. Achieve.</p>
+        
+        <div class="progress-grid">
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span>💻 OS</span><span id="prog-text-os">0/3</span>
+                </div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-os" data-target="3"></div></div>
+            </div>
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span>🏗️ System Design</span><span id="prog-text-sd">0/3</span>
+                </div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-sd" data-target="3"></div></div>
+            </div>
+             <div class="progress-card">
+                <div class="progress-header">
+                    <span>🌐 Networks</span><span id="prog-text-cn">0/3</span>
+                </div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-cn" data-target="3"></div></div>
+            </div>
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span>🗄️ DBMS</span><span id="prog-text-dbms">0/3</span>
+                </div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-dbms" data-target="3"></div></div>
+            </div>
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span>🚀 Development</span><span id="prog-text-dev">0/3</span>
+                </div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-dev" data-target="3"></div></div>
+            </div>
+             <div class="progress-card">
+                <div class="progress-header">
+                    <span>🔁 Daily DSA</span><span id="prog-text-dsa">0/5</span>
+                </div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar-dsa" data-target="5" style="background: linear-gradient(to right, var(--success), var(--accent-primary));"></div></div>
+            </div>
+        </div>
+
+        <!-- 6-Month Progress Chart -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <div>
+                    <h3 style="margin: 0; color: var(--accent-primary);">📈 6-Month Performance Matrix</h3>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Starts March 2026</span>
+                </div>
+                <button id="btn-mock-data" style="background: rgba(166, 94, 255, 0.2); color: var(--accent-secondary); border: 1px solid var(--accent-secondary); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;">✨ Test Graph</button>
+            </div>
+            <canvas id="progressChart"></canvas>
+        </div>
+
+        <!-- Consistency Heatmap -->
+        <div class="heatmap-section">
+            <h3 style="margin: 0 0 20px 0; color: var(--accent-primary);">📅 Consistency Heatmap</h3>
+            <div class="heatmap-container">
+                <div id="heatmap-grid" class="heatmap-grid"></div>
+            </div>
+            <div class="heatmap-labels" id="heatmap-months">
+                <!-- Month labels injected here -->
+            </div>
+            <div class="heatmap-legend">
+                <span>Less</span>
+                <div class="legend-square lvl-0"></div>
+                <div class="legend-square lvl-1"></div>
+                <div class="legend-square lvl-2"></div>
+                <div class="legend-square lvl-3"></div>
+                <div class="legend-square lvl-4"></div>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="week-grid">
+        <div class="day-card">
+            <div class="day-header">🗓 MONDAY</div>
+            <ul class="task-list">
+                <li class="task-item">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" data-subject="rev">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="task-details">
+                        <span class="task-subject">📝 Quick Revision</span>
+                        <span class="task-type"> Warmup</span>
+                    </div>
+                     <div class="task-time">⏱️ 11:15 AM - 12:00 PM</div>
+                </li>
+                <li class="task-item">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" data-subject="os">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="task-details">
+                        <span class="task-subject">💻 Operating System</span>
+                        <span class="task-type">Core Subject</span>
+                    </div>
+                    <div class="task-time">⏱️ 1:00 PM - 3:00 PM</div>
+                </li>
+                <li class="task-item">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" data-subject="dev">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="task-details">
+                        <span class="task-subject">🚀 Development</span>
+                        <span class="task-type">Project Work</span>
+                    </div>
+                    <div class="task-time">⏱️ 3:00 PM - 5:00 PM</div>
+                </li>
+                 <li class="task-item">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" data-subject="cn">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="task-details">
+                        <span class="task-subject">🌐 Computer Networks</span>
+                        <span class="task-type">Core Subject</span>
+                    </div>
+                    <div class="task-time">⏱️ 7:00 PM - 9:00 PM</div>
+                </li>
+                 <li class="task-item" style="background: rgba(166, 94, 255, 0.05);">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" data-subject="dsa">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="task-details">
+                        <span class="task-subject" style="color: var(--accent-secondary)">🔁 DSA Grind</span>
+                        <span class="task-type">Problem Solving</span>
+                    </div>
+                    <div class="task-time">🌙 11:00 PM - 1:00 AM</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="day-card">
+            <div class="day-header">🗓 TUESDAY</div>
+             <ul class="task-list">
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="rev"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">📝 Quick Revision</span></div>
+                     <div class="task-time">12:15 PM - 1:00 PM</div>
+                </li>
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dbms"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🗄 DBMS</span><span class="task-type">Core Subject</span></div>
+                    <div class="task-time">2:00 PM - 3:30 PM</div>
+                </li>
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dev"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🚀 Development</span></div>
+                    <div class="task-time">3:30 PM - 5:00 PM</div>
+                </li>
+                 <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="cn"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🌐 Computer Networks</span></div>
+                    <div class="task-time">7:00 PM - 9:00 PM</div>
+                </li>
+                 <li class="task-item" style="background: rgba(166, 94, 255, 0.05);">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dsa"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject" style="color: var(--accent-secondary)">🔁 DSA Grind</span></div>
+                    <div class="task-time">🌙 11:00 PM - 1:00 AM</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="day-card">
+            <div class="day-header">🗓 WEDNESDAY</div>
+            <ul class="task-list">
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="rev"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">📝 Quick Revision</span></div>
+                     <div class="task-time">11:15 AM - 12:00 PM</div>
+                </li>
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="os"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">💻 Operating System</span></div>
+                    <div class="task-time">1:00 PM - 3:00 PM</div>
+                </li>
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dbms"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🗄 DBMS</span></div>
+                    <div class="task-time">3:00 PM - 5:00 PM</div>
+                </li>
+                 <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="sd"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🏗 System Design</span><span class="task-type">Architecture</span></div>
+                    <div class="task-time">7:00 PM - 9:00 PM</div>
+                </li>
+                 <li class="task-item" style="background: rgba(166, 94, 255, 0.05);">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dsa"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject" style="color: var(--accent-secondary)">🔁 DSA Grind</span></div>
+                    <div class="task-time">🌙 11:00 PM - 1:00 AM</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="day-card">
+            <div class="day-header">🗓 THURSDAY</div>
+            <ul class="task-list">
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="rev"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">📝 Quick Revision</span></div>
+                     <div class="task-time">12:15 PM - 1:00 PM</div>
+                </li>
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="os"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">💻 Operating System</span></div>
+                    <div class="task-time">2:00 PM - 3:30 PM</div>
+                </li>
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="sd"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🏗 System Design</span></div>
+                    <div class="task-time">3:30 PM - 5:00 PM</div>
+                </li>
+                 <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dev"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🚀 Development</span></div>
+                    <div class="task-time">7:00 PM - 9:00 PM</div>
+                </li>
+                 <li class="task-item" style="background: rgba(166, 94, 255, 0.05);">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dsa"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject" style="color: var(--accent-secondary)">🔁 DSA Grind</span></div>
+                    <div class="task-time">🌙 11:00 PM - 1:00 AM</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="day-card">
+            <div class="day-header">🗓 FRIDAY</div>
+            <ul class="task-list">
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="rev"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">📝 Quick Revision</span></div>
+                     <div class="task-time">11:00 AM - 1:00 PM</div>
+                </li>
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="cn"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🌐 Computer Networks</span></div>
+                    <div class="task-time">1:00 PM - 3:00 PM</div>
+                </li>
+                <li class="task-item" style="background: rgba(255, 215, 0, 0.05);">
+                     <div class="task-details" style="padding-left: 0;"><span class="task-subject" style="color: #ffd700">☕ Break Time</span></div>
+                    <div class="task-time">3:00 PM - 5:00 PM</div>
+                </li>
+                 <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dbms"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🗄 DBMS</span></div>
+                    <div class="task-time">5:00 PM - 7:00 PM</div>
+                </li>
+                <li class="task-item">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="sd"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject">🏗 System Design</span></div>
+                    <div class="task-time">7:00 PM - 9:00 PM</div>
+                </li>
+                 <li class="task-item" style="background: rgba(166, 94, 255, 0.05);">
+                     <label class="checkbox-wrapper"><input type="checkbox" data-subject="dsa"><span class="checkmark"></span></label>
+                    <div class="task-details"><span class="task-subject" style="color: var(--accent-secondary)">🔁 DSA Grind</span></div>
+                    <div class="task-time">🌙 11:00 PM - 1:00 AM</div>
+                </li>
+            </ul>
+        </div>
+    </div> <div class="weekend-container">
+        <div class="day-card saturday-card" style="border-color: var(--success);">
+            <div class="day-header">🗓 SATURDAY: Full Revision 🔁</div>
+            <div class="revision-list">
+                <span class="revision-tag">💻 Operating System</span>
+                <span class="revision-tag">🏗 System Design</span>
+                <span class="revision-tag">🌐 Networks</span>
+                <span class="revision-tag">🗄 DBMS</span>
+                <span class="revision-tag">🚀 Development</span>
+                <span class="revision-tag">🔁 DSA Notes</span>
+            </div>
+             <ul class="task-list">
+                 <li class="task-item" style="border-top: 1px solid #2a2a3a;">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" data-subject="full-rev">
+                        <span class="checkmark" style="border-color: var(--success);"></span>
+                    </label>
+                    <div class="task-details">
+                        <span class="task-subject">Mark Revision Complete</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="day-card sunday-card" style="border-color: #ffd700;">
+            <div class="day-header">🗓 SUNDAY: Recharge 🌿</div>
+            <div class="break-content">
+                <h3>Full Day Break</h3>
+                <p>Study freely if inspired, or disconnect completely.</p>
+                <p style="font-size: 2rem; margin: 20px 0;">🎮 📚 💤 🏃‍♂️</p>
+                <p>Prepare for the week ahead.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        
+        // Progress Chart Initialization
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        let progressChart;
+
+        // Configuration
+        const START_DATE = new Date('2026-03-01');
+        const END_DATE = new Date('2026-08-31');
+        
+        // Load saved state from local storage
+        checkboxes.forEach((box, index) => {
+            const savedState = localStorage.getItem(`task-${index}`);
+            if (savedState === 'true') {
+                box.checked = true;
+                box.closest('.task-item').classList.add('completed');
+            }
+        });
+
+        // Initialize Chart Data
+        const getChartData = () => {
+            const data = JSON.parse(localStorage.getItem('study-history') || '{}');
+            const labels = [];
+            const points = [];
+            
+            let current = new Date(START_DATE);
+            while (current <= END_DATE) {
+                const dateStr = current.toISOString().split('T')[0];
+                labels.push(current.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                points.push(data[dateStr] || 0);
+                current.setDate(current.getDate() + 1);
+            }
+            return { labels, points };
+        };
+
+        const initChart = () => {
+            const { labels, points } = getChartData();
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Completion Score (%)',
+                        data: points,
+                        borderColor: '#00f2ff',
+                        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1a1a24',
+                            titleColor: '#00f2ff',
+                            bodyColor: '#e0e0e0',
+                            borderColor: '#2a2a3a',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: (context) => `Progress: ${context.parsed.y}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { 
+                                color: '#9898a6', 
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 12
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9898a6', stepSize: 20 }
+                        }
+                    }
+                }
+            });
+        };
+
+        // Update progress history for today
+        const recordDailyProgress = () => {
+            const today = new Date();
+            // Allow recording if it's today (for testing) or within range
+            const isToday = today.toDateString() === new Date().toDateString();
+            if (!isToday && (today < START_DATE || today > END_DATE)) return;
+
+            const dateStr = today.toISOString().split('T')[0];
+            const totalTasks = checkboxes.length;
+            const completedTasks = Array.from(checkboxes).filter(b => b.checked).length;
+            const percentage = Math.round((completedTasks / totalTasks) * 100);
+
+            const data = JSON.parse(localStorage.getItem('study-history') || '{}');
+            data[dateStr] = percentage;
+            localStorage.setItem('study-history', JSON.stringify(data));
+
+            // Small delay to ensure smooth update if chart already exists
+            if (progressChart) {
+                const { points } = getChartData();
+                progressChart.data.datasets[0].data = points;
+                progressChart.update('none');
+                renderHeatmap(); // Refresh heatmap too
+            }
+        };
+
+        // Heatmap Logic
+        const renderHeatmap = () => {
+            const grid = document.getElementById('heatmap-grid');
+            const monthLabels = document.getElementById('heatmap-months');
+            grid.innerHTML = '';
+            monthLabels.innerHTML = '';
+            
+            const data = JSON.parse(localStorage.getItem('study-history') || '{}');
+            let current = new Date(START_DATE);
+            
+            // Align to start of the week (Sunday)
+            current.setDate(current.getDate() - current.getDay());
+
+            const monthsSeen = new Set();
+
+            while (current <= END_DATE) {
+                const dateStr = current.toISOString().split('T')[0];
+                const score = data[dateStr] || 0;
+                
+                const square = document.createElement('div');
+                square.className = 'heatmap-square';
+                
+                // Set level based on score
+                let level = 0;
+                if (score > 0 && score <= 25) level = 1;
+                else if (score > 25 && score <= 50) level = 2;
+                else if (score > 50 && score <= 75) level = 3;
+                else if (score > 75) level = 4;
+                
+                square.classList.add(`lvl-${level}`);
+                square.title = `${current.toDateString()}: ${score}%`;
+                
+                grid.appendChild(square);
+
+                // Add month labels
+                const month = current.toLocaleDateString('en-US', { month: 'short' });
+                if (!monthsSeen.has(month)) {
+                    const span = document.createElement('span');
+                    span.textContent = month;
+                    monthLabels.appendChild(span);
+                    monthsSeen.add(month);
+                }
+
+                current.setDate(current.getDate() + 1);
+            }
+        };
+
+        // Mock data generator for testing
+        document.getElementById('btn-mock-data').addEventListener('click', () => {
+            const data = JSON.parse(localStorage.getItem('study-history') || '{}');
+            let current = new Date(START_DATE);
+            while (current <= END_DATE) {
+                const dateStr = current.toISOString().split('T')[0];
+                data[dateStr] = Math.floor(Math.random() * 80) + 20; // 20-100%
+                current.setDate(current.getDate() + 1);
+                if (current > new Date('2026-03-25')) break; // Demo for first 25 days
+            }
+            localStorage.setItem('study-history', JSON.stringify(data));
+            const { points } = getChartData();
+            progressChart.data.datasets[0].data = points;
+            progressChart.update();
+            renderHeatmap(); // Update heatmap after mock
+            alert('Mock data generated for March 2026!');
+        });
+
+        initChart();
+        renderHeatmap();
+        updateAllProgress();
+        recordDailyProgress(); // Record initial state
+
+        // Add event listeners to all checkboxes
+        checkboxes.forEach((box, index) => {
+            box.addEventListener('change', () => {
+                // Save state
+                localStorage.setItem(`task-${index}`, box.checked);
+                
+                // Visual strikethrough
+                if(box.checked) {
+                    box.closest('.task-item').classList.add('completed');
+                } else {
+                    box.closest('.task-item').classList.remove('completed');
+                }
+
+                // Update UI and record progress
+                updateAllProgress();
+                recordDailyProgress();
+            });
+        });
+
+        function updateAllProgress() {
+            updateSubjectProgress('os', 'prog-bar-os', 'prog-text-os');
+            updateSubjectProgress('sd', 'prog-bar-sd', 'prog-text-sd');
+            updateSubjectProgress('cn', 'prog-bar-cn', 'prog-text-cn');
+            updateSubjectProgress('dbms', 'prog-bar-dbms', 'prog-text-dbms');
+            updateSubjectProgress('dev', 'prog-bar-dev', 'prog-text-dev');
+            updateSubjectProgress('dsa', 'prog-bar-dsa', 'prog-text-dsa');
+        }
+
+        function updateSubjectProgress(subjectCode, barId, textId) {
+            const subjectBoxes = document.querySelectorAll(`input[data-subject="${subjectCode}"]`);
+            const checkedBoxes = document.querySelectorAll(`input[data-subject="${subjectCode}"]:checked`);
+            
+            const bar = document.getElementById(barId);
+            const text = document.getElementById(textId);
+            const target = parseInt(bar.getAttribute('data-target'));
+            
+            const count = checkedBoxes.length;
+            // Cap percentage at 100% even if they do extra
+            const percentage = Math.min((count / target) * 100, 100);
+            
+            bar.style.width = `${percentage}%`;
+            text.textContent = `${count}/${target}`;
+
+            // Optional: glow effect when target reached
+            if (count >= target) {
+                bar.parentElement.style.boxShadow = `0 0 10px var(--accent-primary)`;
+            } else {
+                bar.parentElement.style.boxShadow = 'none';
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
