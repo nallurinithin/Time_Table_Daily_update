@@ -1,4 +1,4 @@
-name: CI/CD — Docker Build & Push to Docker Hub
+name: CI/CD — Docker Build, Push & Deploy to Render
 
 on:
   push:
@@ -12,7 +12,6 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: timetable-dashboard
-  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
 
 jobs:
   # ─────────────────────────────────────────
@@ -73,7 +72,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: false
-          tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:test
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -131,3 +130,41 @@ jobs:
           echo "Commit: ${{ github.sha }}"
           echo "Branch: ${{ github.ref_name }}"
           echo "====================================="
+
+  # ─────────────────────────────────────────
+  # JOB 4: Deploy to Render.com via Deploy Hook
+  # ─────────────────────────────────────────
+  deploy:
+    name: 🌐 Deploy to Render.com
+    runs-on: ubuntu-latest
+    needs: push
+    # Only deploy on push to main/master (not PRs)
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: 🌐 Trigger Render Deploy Hook
+        run: |
+          echo "Triggering deployment on Render.com..."
+          curl -s --fail \
+            --request POST \
+            "${{ secrets.RENDER_DEPLOY_HOOK }}" \
+            && echo "✅ Render deploy triggered successfully!" \
+            || (echo "❌ Render deploy trigger failed!" && exit 1)
+
+      - name: ⏳ Wait for Render to pull latest image
+        run: |
+          echo "Waiting 30 seconds for Render to start deployment..."
+          sleep 30
+          echo "✅ Deploy initiated. Check Render dashboard for live status."
+
+      - name: 🎉 CD Complete — Deployment Summary
+        run: |
+          echo "=============================================="
+          echo "✅ Full CI/CD Pipeline Completed!"
+          echo "----------------------------------------------"
+          echo "📦 Docker Image : nithinnalluri/timetable-dashboard:latest"
+          echo "🌐 Deployed to  : Render.com"
+          echo "🔀 Commit SHA   : ${{ github.sha }}"
+          echo "🌿 Branch       : ${{ github.ref_name }}"
+          echo "⏰ Triggered at : ${{ github.event.head_commit.timestamp }}"
+          echo "=============================================="
